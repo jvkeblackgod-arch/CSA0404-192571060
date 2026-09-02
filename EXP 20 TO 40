@@ -1,0 +1,1129 @@
+Sure 👍 Below are Experiments 21–40 in simple student-level C, with user input wherever appropriate. I’ve kept the programs easy to understand and suitable for an OS lab.
+
+21. Worst Fit Memory Allocation
+#include <stdio.h>
+
+int main()
+{
+    int block[20], process[20];
+    int n, m, i, j;
+    int allocation[20];
+
+    printf("Enter number of memory blocks: ");
+    scanf("%d", &n);
+
+    for (i = 0; i < n; i++)
+    {
+        printf("Enter size of Block %d: ", i + 1);
+        scanf("%d", &block[i]);
+    }
+
+    printf("Enter number of processes: ");
+    scanf("%d", &m);
+
+    for (i = 0; i < m; i++)
+    {
+        printf("Enter memory required for P%d: ", i + 1);
+        scanf("%d", &process[i]);
+        allocation[i] = -1;
+    }
+
+    for (i = 0; i < m; i++)
+    {
+        int worst = -1;
+
+        for (j = 0; j < n; j++)
+        {
+            if (block[j] >= process[i])
+            {
+                if (worst == -1 || block[j] > block[worst])
+                    worst = j;
+            }
+        }
+
+        if (worst != -1)
+        {
+            allocation[i] = worst;
+            block[worst] -= process[i];
+        }
+    }
+
+    printf("\nProcess\tAllocation\n");
+
+    for (i = 0; i < m; i++)
+    {
+        if (allocation[i] != -1)
+            printf("P%d\tBlock %d\n", i + 1, allocation[i] + 1);
+        else
+            printf("P%d\tNot Allocated\n", i + 1);
+    }
+
+    return 0;
+}
+
+22. Best Fit Memory Allocation
+#include <stdio.h>
+
+int main()
+{
+    int block[20], process[20];
+    int n, m, i, j;
+    int allocation[20];
+
+    printf("Enter number of memory blocks: ");
+    scanf("%d", &n);
+
+    for (i = 0; i < n; i++)
+    {
+        printf("Enter size of Block %d: ", i + 1);
+        scanf("%d", &block[i]);
+    }
+
+    printf("Enter number of processes: ");
+    scanf("%d", &m);
+
+    for (i = 0; i < m; i++)
+    {
+        printf("Enter memory required for P%d: ", i + 1);
+        scanf("%d", &process[i]);
+        allocation[i] = -1;
+    }
+
+    for (i = 0; i < m; i++)
+    {
+        int best = -1;
+
+        for (j = 0; j < n; j++)
+        {
+            if (block[j] >= process[i])
+            {
+                if (best == -1 || block[j] < block[best])
+                    best = j;
+            }
+        }
+
+        if (best != -1)
+        {
+            allocation[i] = best;
+            block[best] -= process[i];
+        }
+    }
+
+    printf("\nProcess\tAllocation\n");
+
+    for (i = 0; i < m; i++)
+    {
+        if (allocation[i] != -1)
+            printf("P%d\tBlock %d\n", i + 1, allocation[i] + 1);
+        else
+            printf("P%d\tNot Allocated\n", i + 1);
+    }
+
+    return 0;
+}
+
+23. First Fit Memory Allocation
+#include <stdio.h>
+
+int main()
+{
+    int block[20], process[20];
+    int n, m, i, j;
+    int allocation[20];
+
+    printf("Enter number of memory blocks: ");
+    scanf("%d", &n);
+
+    for (i = 0; i < n; i++)
+    {
+        printf("Enter size of Block %d: ", i + 1);
+        scanf("%d", &block[i]);
+    }
+
+    printf("Enter number of processes: ");
+    scanf("%d", &m);
+
+    for (i = 0; i < m; i++)
+    {
+        printf("Enter memory required for P%d: ", i + 1);
+        scanf("%d", &process[i]);
+        allocation[i] = -1;
+    }
+
+    for (i = 0; i < m; i++)
+    {
+        for (j = 0; j < n; j++)
+        {
+            if (block[j] >= process[i])
+            {
+                allocation[i] = j;
+                block[j] -= process[i];
+                break;
+            }
+        }
+    }
+
+    printf("\nProcess\tAllocation\n");
+
+    for (i = 0; i < m; i++)
+    {
+        if (allocation[i] != -1)
+            printf("P%d\tBlock %d\n", i + 1, allocation[i] + 1);
+        else
+            printf("P%d\tNot Allocated\n", i + 1);
+    }
+
+    return 0;
+}
+
+24. UNIX System Calls for File Management
+
+Uses open(), read(), write() and close().
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main()
+{
+    int fd;
+    char filename[50];
+    char data[100];
+
+    printf("Enter file name: ");
+    scanf("%s", filename);
+
+    fd = open(filename, O_CREAT | O_WRONLY, 0644);
+
+    if (fd == -1)
+    {
+        printf("File cannot be opened\n");
+        return 1;
+    }
+
+    printf("Enter text: ");
+    scanf(" %[^\n]", data);
+
+    write(fd, data, sizeof(data));
+
+    close(fd);
+
+    printf("Data written successfully\n");
+
+    return 0;
+}
+
+25. UNIX I/O System Calls — fcntl, seek, stat, opendir, readdir
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <dirent.h>
+
+int main()
+{
+    int fd;
+    char filename[50];
+    struct stat st;
+    DIR *dir;
+    struct dirent *entry;
+
+    printf("Enter file name: ");
+    scanf("%s", filename);
+
+    fd = open(filename, O_RDWR | O_CREAT, 0644);
+
+    printf("\nFile descriptor = %d\n", fd);
+
+    printf("File control value = %d\n", fcntl(fd, F_GETFL));
+
+    lseek(fd, 0, SEEK_SET);
+    printf("File pointer moved to beginning\n");
+
+    stat(filename, &st);
+
+    printf("File size = %ld bytes\n", st.st_size);
+
+    close(fd);
+
+    printf("\nFiles in current directory:\n");
+
+    dir = opendir(".");
+
+    if (dir != NULL)
+    {
+        while ((entry = readdir(dir)) != NULL)
+        {
+            printf("%s\n", entry->d_name);
+        }
+
+        closedir(dir);
+    }
+
+    return 0;
+}
+
+26. File Management Operations
+
+Create, write, read and append to a file.
+
+#include <stdio.h>
+
+int main()
+{
+    FILE *fp;
+    char filename[50];
+    char data[100];
+    int choice;
+
+    printf("Enter file name: ");
+    scanf("%s", filename);
+
+    printf("\n1. Create/Write");
+    printf("\n2. Read");
+    printf("\n3. Append");
+    printf("\nEnter choice: ");
+    scanf("%d", &choice);
+
+    if (choice == 1)
+    {
+        fp = fopen(filename, "w");
+
+        printf("Enter data: ");
+        scanf(" %[^\n]", data);
+
+        fprintf(fp, "%s", data);
+        fclose(fp);
+
+        printf("File written successfully\n");
+    }
+    else if (choice == 2)
+    {
+        fp = fopen(filename, "r");
+
+        if (fp == NULL)
+        {
+            printf("File not found\n");
+            return 1;
+        }
+
+        printf("\nFile contents:\n");
+
+        while (fgets(data, sizeof(data), fp))
+            printf("%s", data);
+
+        fclose(fp);
+    }
+    else if (choice == 3)
+    {
+        fp = fopen(filename, "a");
+
+        printf("Enter data to append: ");
+        scanf(" %[^\n]", data);
+
+        fprintf(fp, "%s", data);
+
+        fclose(fp);
+
+        printf("Data appended successfully\n");
+    }
+
+    return 0;
+}
+
+27. Simulate ls UNIX Command
+#include <stdio.h>
+#include <dirent.h>
+
+int main()
+{
+    DIR *dir;
+    struct dirent *entry;
+
+    dir = opendir(".");
+
+    if (dir == NULL)
+    {
+        printf("Cannot open directory\n");
+        return 1;
+    }
+
+    printf("Files and directories:\n\n");
+
+    while ((entry = readdir(dir)) != NULL)
+    {
+        printf("%s\n", entry->d_name);
+    }
+
+    closedir(dir);
+
+    return 0;
+}
+
+Compile
+gcc program.c -o ls_sim
+./ls_sim
+
+28. Simulate grep UNIX Command
+
+This searches for a word inside a file.
+
+#include <stdio.h>
+#include <string.h>
+
+int main()
+{
+    FILE *fp;
+    char filename[50];
+    char word[30];
+    char line[200];
+
+    printf("Enter file name: ");
+    scanf("%s", filename);
+
+    printf("Enter word to search: ");
+    scanf("%s", word);
+
+    fp = fopen(filename, "r");
+
+    if (fp == NULL)
+    {
+        printf("File not found\n");
+        return 1;
+    }
+
+    printf("\nMatching lines:\n");
+
+    while (fgets(line, sizeof(line), fp))
+    {
+        if (strstr(line, word) != NULL)
+        {
+            printf("%s", line);
+        }
+    }
+
+    fclose(fp);
+
+    return 0;
+}
+
+29. Classical Process Synchronization Problem
+
+Here is a simple Producer-Consumer solution using semaphores.
+
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+
+int buffer[5];
+int in = 0, out = 0;
+
+sem_t empty;
+sem_t full;
+pthread_mutex_t mutex;
+
+void *producer(void *arg)
+{
+    int item;
+
+    printf("Enter item to produce: ");
+    scanf("%d", &item);
+
+    sem_wait(&empty);
+    pthread_mutex_lock(&mutex);
+
+    buffer[in] = item;
+    in = (in + 1) % 5;
+
+    printf("Produced item = %d\n", item);
+
+    pthread_mutex_unlock(&mutex);
+    sem_post(&full);
+
+    return NULL;
+}
+
+void *consumer(void *arg)
+{
+    int item;
+
+    sem_wait(&full);
+    pthread_mutex_lock(&mutex);
+
+    item = buffer[out];
+    out = (out + 1) % 5;
+
+    printf("Consumed item = %d\n", item);
+
+    pthread_mutex_unlock(&mutex);
+    sem_post(&empty);
+
+    return NULL;
+}
+
+int main()
+{
+    pthread_t p, c;
+
+    sem_init(&empty, 0, 5);
+    sem_init(&full, 0, 0);
+    pthread_mutex_init(&mutex, NULL);
+
+    pthread_create(&p, NULL, producer, NULL);
+    pthread_join(p, NULL);
+
+    pthread_create(&c, NULL, consumer, NULL);
+    pthread_join(c, NULL);
+
+    return 0;
+}
+
+
+Compile:
+
+gcc program.c -o program -pthread
+
+30. Thread Concepts — Create, Join, Equal and Exit
+
+Uses pthread_create(), pthread_join(), pthread_equal() and pthread_exit().
+
+#include <stdio.h>
+#include <pthread.h>
+
+void *function(void *arg)
+{
+    pthread_t id = pthread_self();
+
+    printf("Thread is running\n");
+
+    printf("Thread ID = %lu\n", id);
+
+    pthread_exit(NULL);
+}
+
+int main()
+{
+    pthread_t t1, t2;
+
+    printf("Creating threads...\n");
+
+    pthread_create(&t1, NULL, function, NULL);
+    pthread_create(&t2, NULL, function, NULL);
+
+    if (pthread_equal(t1, t2))
+        printf("Both thread IDs are equal\n");
+    else
+        printf("Thread IDs are not equal\n");
+
+    pthread_join(t1, NULL);
+    pthread_join(t2, NULL);
+
+    printf("Threads joined successfully\n");
+
+    return 0;
+}
+
+
+Compile:
+
+gcc program.c -o program -pthread
+
+31. FIFO Page Replacement
+#include <stdio.h>
+
+int main()
+{
+    int pages[50], frames[10];
+    int n, f;
+    int i, j, k = 0;
+    int faults = 0, hit;
+
+    printf("Enter number of pages: ");
+    scanf("%d", &n);
+
+    printf("Enter page reference string:\n");
+
+    for (i = 0; i < n; i++)
+        scanf("%d", &pages[i]);
+
+    printf("Enter number of frames: ");
+    scanf("%d", &f);
+
+    for (i = 0; i < f; i++)
+        frames[i] = -1;
+
+    for (i = 0; i < n; i++)
+    {
+        hit = 0;
+
+        for (j = 0; j < f; j++)
+        {
+            if (frames[j] == pages[i])
+            {
+                hit = 1;
+                break;
+            }
+        }
+
+        if (!hit)
+        {
+            frames[k] = pages[i];
+            k = (k + 1) % f;
+            faults++;
+        }
+
+        printf("\nPage %d: ", pages[i]);
+
+        for (j = 0; j < f; j++)
+            printf("%d ", frames[j]);
+    }
+
+    printf("\n\nTotal Page Faults = %d\n", faults);
+
+    return 0;
+}
+
+32. LRU Page Replacement
+#include <stdio.h>
+
+int main()
+{
+    int pages[50], frames[10], recent[10];
+    int n, f;
+    int i, j, k;
+    int faults = 0, hit, pos;
+
+    printf("Enter number of pages: ");
+    scanf("%d", &n);
+
+    printf("Enter page reference string:\n");
+
+    for (i = 0; i < n; i++)
+        scanf("%d", &pages[i]);
+
+    printf("Enter number of frames: ");
+    scanf("%d", &f);
+
+    for (i = 0; i < f; i++)
+        frames[i] = -1;
+
+    for (i = 0; i < n; i++)
+    {
+        hit = 0;
+
+        for (j = 0; j < f; j++)
+        {
+            if (frames[j] == pages[i])
+            {
+                hit = 1;
+                recent[j] = i;
+                break;
+            }
+        }
+
+        if (!hit)
+        {
+            faults++;
+
+            pos = 0;
+
+            for (j = 0; j < f; j++)
+            {
+                if (frames[j] == -1)
+                {
+                    pos = j;
+                    break;
+                }
+
+                if (recent[j] < recent[pos])
+                    pos = j;
+            }
+
+            frames[pos] = pages[i];
+            recent[pos] = i;
+        }
+
+        printf("\nPage %d: ", pages[i]);
+
+        for (k = 0; k < f; k++)
+            printf("%d ", frames[k]);
+    }
+
+    printf("\n\nTotal Page Faults = %d\n", faults);
+
+    return 0;
+}
+
+33. Optimal Page Replacement
+#include <stdio.h>
+
+int main()
+{
+    int pages[50], frames[10];
+    int n, f;
+    int i, j, k;
+    int faults = 0, hit;
+    int pos, farthest, next;
+
+    printf("Enter number of pages: ");
+    scanf("%d", &n);
+
+    printf("Enter page reference string:\n");
+
+    for (i = 0; i < n; i++)
+        scanf("%d", &pages[i]);
+
+    printf("Enter number of frames: ");
+    scanf("%d", &f);
+
+    for (i = 0; i < f; i++)
+        frames[i] = -1;
+
+    for (i = 0; i < n; i++)
+    {
+        hit = 0;
+
+        for (j = 0; j < f; j++)
+        {
+            if (frames[j] == pages[i])
+            {
+                hit = 1;
+                break;
+            }
+        }
+
+        if (!hit)
+        {
+            faults++;
+            pos = -1;
+            farthest = -1;
+
+            for (j = 0; j < f; j++)
+            {
+                if (frames[j] == -1)
+                {
+                    pos = j;
+                    break;
+                }
+
+                next = 0;
+
+                for (k = i + 1; k < n; k++)
+                {
+                    if (pages[k] == frames[j])
+                    {
+                        next = k;
+                        break;
+                    }
+                }
+
+                if (next > farthest)
+                {
+                    farthest = next;
+                    pos = j;
+                }
+            }
+
+            frames[pos] = pages[i];
+        }
+
+        printf("\nPage %d: ", pages[i]);
+
+        for (j = 0; j < f; j++)
+            printf("%d ", frames[j]);
+    }
+
+    printf("\n\nTotal Page Faults = %d\n", faults);
+
+    return 0;
+}
+
+34. Sequential File Allocation
+
+In sequential allocation, file blocks are stored continuously.
+
+#include <stdio.h>
+
+int main()
+{
+    int start, length;
+    int i;
+
+    printf("Enter starting block: ");
+    scanf("%d", &start);
+
+    printf("Enter number of blocks: ");
+    scanf("%d", &length);
+
+    printf("\nFile blocks:\n");
+
+    for (i = 0; i < length; i++)
+    {
+        printf("%d ", start + i);
+    }
+
+    printf("\n");
+
+    return 0;
+}
+
+Example
+Enter starting block: 10
+Enter number of blocks: 5
+
+File blocks:
+10 11 12 13 14
+
+35. Indexed File Allocation
+#include <stdio.h>
+
+int main()
+{
+    int indexBlock;
+    int n, blocks[50];
+    int i;
+
+    printf("Enter index block number: ");
+    scanf("%d", &indexBlock);
+
+    printf("Enter number of file blocks: ");
+    scanf("%d", &n);
+
+    printf("Enter block numbers:\n");
+
+    for (i = 0; i < n; i++)
+        scanf("%d", &blocks[i]);
+
+    printf("\nIndex Block = %d\n", indexBlock);
+
+    printf("File blocks:\n");
+
+    for (i = 0; i < n; i++)
+        printf("Entry %d -> Block %d\n", i + 1, blocks[i]);
+
+    return 0;
+}
+
+36. Linked File Allocation
+#include <stdio.h>
+
+int main()
+{
+    int block[50], next[50];
+    int n, i;
+
+    printf("Enter number of blocks in file: ");
+    scanf("%d", &n);
+
+    printf("Enter block numbers:\n");
+
+    for (i = 0; i < n; i++)
+        scanf("%d", &block[i]);
+
+    for (i = 0; i < n - 1; i++)
+        next[i] = block[i + 1];
+
+    next[n - 1] = -1;
+
+    printf("\nLinked Allocation:\n");
+
+    for (i = 0; i < n; i++)
+    {
+        printf("Block %d -> %d\n", block[i], next[i]);
+    }
+
+    printf("\nFirst Block = %d", block[0]);
+    printf("\nLast Block = %d\n", block[n - 1]);
+
+    return 0;
+}
+
+37. FCFS Disk Scheduling
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    int request[50];
+    int n, head;
+    int i, total = 0;
+
+    printf("Enter number of requests: ");
+    scanf("%d", &n);
+
+    printf("Enter request queue:\n");
+
+    for (i = 0; i < n; i++)
+        scanf("%d", &request[i]);
+
+    printf("Enter initial head position: ");
+    scanf("%d", &head);
+
+    printf("\nDisk movement:\n");
+
+    for (i = 0; i < n; i++)
+    {
+        printf("%d -> ", head);
+
+        total += abs(head - request[i]);
+        head = request[i];
+    }
+
+    printf("%d\n", head);
+
+    printf("\nTotal head movement = %d\n", total);
+
+    return 0;
+}
+
+38. SCAN Disk Scheduling
+
+This example assumes the disk head initially moves toward 0.
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    int request[50];
+    int n, head, disk_size;
+    int i, j, temp;
+    int total = 0;
+
+    printf("Enter disk size: ");
+    scanf("%d", &disk_size);
+
+    printf("Enter number of requests: ");
+    scanf("%d", &n);
+
+    printf("Enter request queue:\n");
+
+    for (i = 0; i < n; i++)
+        scanf("%d", &request[i]);
+
+    printf("Enter initial head position: ");
+    scanf("%d", &head);
+
+    for (i = 0; i < n - 1; i++)
+    {
+        for (j = i + 1; j < n; j++)
+        {
+            if (request[i] > request[j])
+            {
+                temp = request[i];
+                request[i] = request[j];
+                request[j] = temp;
+            }
+        }
+    }
+
+    printf("\nSCAN Order:\n");
+
+    /* Requests smaller than head */
+    for (i = n - 1; i >= 0; i--)
+    {
+        if (request[i] <= head)
+        {
+            printf("%d -> ", head);
+            total += abs(head - request[i]);
+            head = request[i];
+        }
+    }
+
+    /* Move to disk 0 */
+    printf("%d -> ", head);
+    total += head;
+    head = 0;
+
+    /* Requests greater than original head */
+    for (i = 0; i < n; i++)
+    {
+        if (request[i] > head)
+        {
+            printf("%d -> ", head);
+            total += abs(head - request[i]);
+            head = request[i];
+        }
+    }
+
+    printf("%d\n", head);
+
+    printf("\nTotal head movement = %d\n", total);
+
+    return 0;
+}
+
+39. C-SCAN Disk Scheduling
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    int request[50];
+    int n, head, disk_size;
+    int i, j, temp;
+    int total = 0;
+    int original;
+
+    printf("Enter disk size: ");
+    scanf("%d", &disk_size);
+
+    printf("Enter number of requests: ");
+    scanf("%d", &n);
+
+    printf("Enter request queue:\n");
+
+    for (i = 0; i < n; i++)
+        scanf("%d", &request[i]);
+
+    printf("Enter initial head position: ");
+    scanf("%d", &head);
+
+    original = head;
+
+    for (i = 0; i < n - 1; i++)
+    {
+        for (j = i + 1; j < n; j++)
+        {
+            if (request[i] > request[j])
+            {
+                temp = request[i];
+                request[i] = request[j];
+                request[j] = temp;
+            }
+        }
+    }
+
+    printf("\nC-SCAN Order:\n");
+
+    /* Move towards higher cylinder numbers */
+    for (i = 0; i < n; i++)
+    {
+        if (request[i] >= original)
+        {
+            printf("%d -> ", head);
+            total += abs(head - request[i]);
+            head = request[i];
+        }
+    }
+
+    /* Move to end of disk */
+    printf("%d -> ", head);
+    total += (disk_size - 1) - head;
+    head = disk_size - 1;
+
+    /* Jump to beginning */
+    printf("%d -> ", head);
+    total += disk_size - 1;
+    head = 0;
+
+    /* Service remaining requests */
+    for (i = 0; i < n; i++)
+    {
+        if (request[i] < original)
+        {
+            printf("%d -> ", head);
+            total += abs(head - request[i]);
+            head = request[i];
+        }
+    }
+
+    printf("%d\n", head);
+
+    printf("\nTotal head movement = %d\n", total);
+
+    return 0;
+}
+
+40. File Access Permissions and Types of Users in Linux
+
+Linux has three main types of users:
+
+Owner/User (u)
+Group (g)
+Others (o)
+
+Permissions:
+
+r = Read
+w = Write
+x = Execute
+
+This program uses stat() to display permissions.
+
+#include <stdio.h>
+#include <sys/stat.h>
+
+int main()
+{
+    char filename[50];
+    struct stat st;
+
+    printf("Enter file name: ");
+    scanf("%s", filename);
+
+    if (stat(filename, &st) != 0)
+    {
+        printf("File not found\n");
+        return 1;
+    }
+
+    printf("\nFile Permissions:\n");
+
+    printf("Owner/User : ");
+
+    if (st.st_mode & S_IRUSR)
+        printf("r");
+    else
+        printf("-");
+
+    if (st.st_mode & S_IWUSR)
+        printf("w");
+    else
+        printf("-");
+
+    if (st.st_mode & S_IXUSR)
+        printf("x");
+    else
+        printf("-");
+
+    printf("\nGroup      : ");
+
+    if (st.st_mode & S_IRGRP)
+        printf("r");
+    else
+        printf("-");
+
+    if (st.st_mode & S_IWGRP)
+        printf("w");
+    else
+        printf("-");
+
+    if (st.st_mode & S_IXGRP)
+        printf("x");
+    else
+        printf("-");
+
+    printf("\nOthers     : ");
+
+    if (st.st_mode & S_IROTH)
+        printf("r");
+    else
+        printf("-");
+
+    if (st.st_mode & S_IWOTH)
+        printf("w");
+    else
+        printf("-");
+
+    if (st.st_mode & S_IXOTH)
+        printf("x");
+    else
+        printf("-");
+
+    printf("\n");
+
+    return 0;
+}
+
+
